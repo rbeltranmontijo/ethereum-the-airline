@@ -14,6 +14,8 @@ contract Airline {
         uint256 price;
     }
 
+    uint256 etherPerPoint = 0.5 ether;
+
     Flight[] public flights;
 
     mapping(address => Customer) public customers;
@@ -22,7 +24,7 @@ contract Airline {
 
     event FlightPurchased(address indexed customer, uint256 price);
 
-    constructor()  {
+    constructor() public {
         owner = msg.sender;
         flights.push(Flight("Tokio", 4 ether));
         flights.push(Flight("Germany", 1 ether));
@@ -40,5 +42,30 @@ contract Airline {
         customerTotalFlights[msg.sender]++;
 
         emit FlightPurchased(msg.sender, flight.price);
+    }
+
+    function totalFlights() public view returns (uint256) {
+        return flights.length;
+    }
+
+    function redeemLoyaltyPoints() public {
+        Customer storage customer = customers[msg.sender];
+        uint256 etherToRefund = etherPerPoint * customer.loyaltyPoints;
+        msg.sender.transfer(etherToRefund);
+        customer.loyaltyPoints = 0;
+    }
+
+    function getRefundablEther() public view returns (uint256) {
+        return etherPerPoint * customers[msg.sender].loyaltyPoints;
+    }
+
+    function getAirlineBalance() public view isOWner returns (uint256) {
+        address airlineAddress = this;
+        return airlineAddress.balance;
+    }
+
+    modifier isOWner() {
+        require(msg.sender == owner, "Solo el owner puede ver");
+        _;
     }
 }
