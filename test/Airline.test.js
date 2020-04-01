@@ -38,15 +38,39 @@ contract("Airline", accounts => {
     assert.fail();
   });
 
-  it('Obtener el balance real del contrato' async () => {
-    let flight = await instance.buyFlight(0);
+  it("Obtener el balance real del contrato", async () => {
+    let flight1 = await instance.flights(0);
+    let price1 = flight1[1];
+
+    let flight2 = await instance.flights(1);
+    let price2 = flight2[1];
+    await instance.buyFlight(0, { from: accounts[1], value: price1 });
+    await instance.buyFlight(1, { from: accounts[1], value: price2 });
+
+    let newAirlineBalance = await instance.getAirlineBalance();
+
+    assert.equal(
+      parseFloat(newAirlineBalance),
+      parseFloat(price1) + parseFloat(price2)
+    );
+  });
+
+  it("canjear puntos de lealtad", async () => {
+    let flight = await instance.flights(0);
     let price = flight[1];
-    let flight2 = await instance.buyFlight(1);
-    let price2 = flight2[1]
 
-    await instance.buyFlight(0, { from: accounts[0], value: price})
-    await instance.buyFlight(1, { from: accounts[0], value: price2})
+    await instance.buyFlight(1, { from: accounts[0], value: price });
 
-    // let newAirlineBalance = await instance.getAi
-  })
+    let balance = await web3.eth.getBalance(accounts[0]);
+
+    await instance.redeemLoyaltyPoints({ from: accounts[0] });
+
+    let finalBalance = await wb3.eth.getBalance(accounts[0]);
+
+    let customer = await instance.customers(accounts[0]);
+    let loyaltiPoints = customer[0];
+
+    assert(loyaltiPoints, 0);
+    assert(finalBalance > balance);
+  });
 });
