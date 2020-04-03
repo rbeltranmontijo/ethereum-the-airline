@@ -14,7 +14,8 @@ export class App extends Component {
     this.state = {
       accounts: undefined,
       balance: 0,
-      flights: []
+      flights: [],
+      customerFlights: []
     };
   }
 
@@ -45,9 +46,29 @@ export class App extends Component {
     });
   }
 
+  async getCustomerFlights() {
+    let customerFlights = await this.airlineService.getCustomerFlights(
+      this.state.accounts[0]
+    );
+    this.setState({
+      customerFlights
+    });
+  }
+
+  async buyFlight(flightIndex, flight) {
+    // console.log(flightIndex);
+    // console.log(flight);
+    await this.airlineService.buyFlight(
+      flightIndex,
+      this.state.accounts[0],
+      flight.price
+    );
+  }
+
   async load() {
     this.getBalance();
     this.getFlights();
+    this.getCustomerFlights();
   }
 
   render() {
@@ -80,12 +101,24 @@ export class App extends Component {
                   <span>
                     {flight.name} - const: {this.toEther(flight.price)} eth
                   </span>
+                  <button
+                    onClick={() => this.buyFlight(i, flight)}
+                    className="btn btn-sm btn-success text-white"
+                  >
+                    Purchase
+                  </button>
                 </div>
               ))}
             </Panel>
           </div>
           <div className="col-sm">
-            <Panel title="Your flights"></Panel>
+            <Panel title="Your flights">
+              {this.state.customerFlights.map((flight, i) => (
+                <div key={i}>
+                  {flight.name} - cost: {flight.price}
+                </div>
+              ))}
+            </Panel>
           </div>
         </div>
       </React.Fragment>
