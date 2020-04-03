@@ -3,6 +3,7 @@ import Panel from "./Panel";
 
 import getWeb3 from "./getWeb3";
 import AirlineContract from "./airline";
+import { AirlineServices } from "./airlineService";
 
 const converter = web3 => value =>
   web3.utils.fromWei(value.toString(), "ether");
@@ -12,7 +13,8 @@ export class App extends Component {
     super(props);
     this.state = {
       accounts: undefined,
-      balance: 0
+      balance: 0,
+      flights: []
     };
   }
 
@@ -20,7 +22,8 @@ export class App extends Component {
     this.web3 = await getWeb3();
     this.toEther = converter(this.web3);
     this.airline = await AirlineContract(this.web3.currentProvider);
-    // console.log(this.airline);
+    this.airlineService = new AirlineServices(this.airline);
+
     console.log(this.web3.eth);
     let accounts = await this.web3.eth.getAccounts();
     console.log(accounts);
@@ -35,8 +38,16 @@ export class App extends Component {
     });
   }
 
+  async getFlights() {
+    let flights = await this.airlineService.getFlights();
+    this.setState({
+      flights
+    });
+  }
+
   async load() {
     this.getBalance();
+    this.getFlights();
   }
 
   render() {
@@ -63,7 +74,15 @@ export class App extends Component {
         </div>
         <div className="row">
           <div className="col-sm">
-            <Panel title="Available flights"></Panel>
+            <Panel title="Available flights">
+              {this.state.flights.map((flight, i) => (
+                <div key={i}>
+                  <span>
+                    {flight.name} - const: {this.toEther(flight.price)} eth
+                  </span>
+                </div>
+              ))}
+            </Panel>
           </div>
           <div className="col-sm">
             <Panel title="Your flights"></Panel>
