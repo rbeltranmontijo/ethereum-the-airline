@@ -26,13 +26,24 @@ export class App extends Component {
     this.airlineService = new AirlineServices(this.airline);
 
     console.log(this.web3.eth);
-    let accounts = await this.web3.eth.getAccounts();
-    console.log(accounts);
+    let accounts = (await this.web3.eth.getAccounts())[0];
+
+    this.web3.currentProvider.publicConfigStore.on(
+      "update",
+      async function(event) {
+        this.setState(
+          {
+            accounts: event.selectedAddress
+          },
+          () => this.load()
+        );
+      }.bind(this)
+    );
     this.setState({ accounts }, () => this.load());
   }
 
   async getBalance() {
-    let weiBalance = await this.web3.eth.getBalance(this.state.accounts[0]);
+    let weiBalance = await this.web3.eth.getBalance(this.state.accounts);
     console.log(weiBalance);
     this.setState({
       balance: this.toEther(weiBalance)
@@ -48,7 +59,7 @@ export class App extends Component {
 
   async getCustomerFlights() {
     let customerFlights = await this.airlineService.getCustomerFlights(
-      this.state.accounts[0]
+      this.state.accounts
     );
     this.setState({
       customerFlights
@@ -60,7 +71,7 @@ export class App extends Component {
     // console.log(flight);
     await this.airlineService.buyFlight(
       flightIndex,
-      this.state.accounts[0],
+      this.state.accounts,
       flight.price
     );
   }
