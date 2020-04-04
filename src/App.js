@@ -15,7 +15,8 @@ export class App extends Component {
       accounts: undefined,
       balance: 0,
       flights: [],
-      customerFlights: []
+      customerFlights: [],
+      refundableEther: 0
     };
   }
 
@@ -57,6 +58,19 @@ export class App extends Component {
     });
   }
 
+  async getRefundableEther() {
+    console.log(this.state.accounts);
+    let refundableEther = await this.airlineService.getRefundableEther(
+      this.state.accounts
+    );
+    refundableEther = this.toEther(refundableEther.toNumber());
+
+    console.log(refundableEther);
+    this.setState({
+      refundableEther
+    });
+  }
+
   async getCustomerFlights() {
     let customerFlights = await this.airlineService.getCustomerFlights(
       this.state.accounts
@@ -80,6 +94,7 @@ export class App extends Component {
     this.getBalance();
     this.getFlights();
     this.getCustomerFlights();
+    this.getRefundableEther();
   }
 
   render() {
@@ -101,7 +116,9 @@ export class App extends Component {
             </Panel>
           </div>
           <div className="col-sm">
-            <Panel title="Loyalty points - refundable ether"></Panel>
+            <Panel title="Loyalty points - refundable ether">
+              <span>{this.state.refundableEther} eth</span>
+            </Panel>
           </div>
         </div>
         <div className="row">

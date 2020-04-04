@@ -33,6 +33,14 @@ export class AirlineServices {
     return await this.contract.totalFlights();
   }
 
+  async getRefundableEther(from) {
+    return await this.contract.getRefundablEther({ from });
+  }
+
+  async redeemloyaltyPoints(from) {
+    return this.contract.redeemLoyaltyPoints({ from });
+  }
+
   mapFlights(flights) {
     return flights.map(flight => {
       return {
