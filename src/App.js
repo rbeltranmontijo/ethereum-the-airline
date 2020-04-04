@@ -71,6 +71,10 @@ export class App extends Component {
     });
   }
 
+  async refundLoyaltyPoints() {
+    await this.airlineService.redeemloyaltyPoints(this.state.accounts);
+  }
+
   async getCustomerFlights() {
     let customerFlights = await this.airlineService.getCustomerFlights(
       this.state.accounts
@@ -118,6 +122,12 @@ export class App extends Component {
           <div className="col-sm">
             <Panel title="Loyalty points - refundable ether">
               <span>{this.state.refundableEther} eth</span>
+              <button
+                className="btn btn-success btn-sm text-white"
+                onClick={this.refundLoyaltyPoints.bind(this)}
+              >
+                Refund
+              </button>
             </Panel>
           </div>
         </div>
