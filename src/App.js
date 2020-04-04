@@ -26,7 +26,18 @@ export class App extends Component {
     this.airline = await AirlineContract(this.web3.currentProvider);
     this.airlineService = new AirlineServices(this.airline);
 
-    console.log(this.web3.eth);
+    let fligthPurchased = this.airline.FlightPurchased();
+    fligthPurchased.watch(
+      function(err, result) {
+        const { customer, price, flight } = result.args;
+        if (customer === this.state.accounts) {
+          console.log(
+            `You purchased a flight to ${flight} with a cost of ${price}`
+          );
+        }
+      }.bind(this)
+    );
+
     let accounts = (await this.web3.eth.getAccounts())[0];
 
     this.web3.currentProvider.publicConfigStore.on(
@@ -45,7 +56,7 @@ export class App extends Component {
 
   async getBalance() {
     let weiBalance = await this.web3.eth.getBalance(this.state.accounts);
-    console.log(weiBalance);
+    // console.log(weiBalance);
     this.setState({
       balance: this.toEther(weiBalance)
     });
@@ -59,13 +70,13 @@ export class App extends Component {
   }
 
   async getRefundableEther() {
-    console.log(this.state.accounts);
+    // console.log(this.state.accounts);
     let refundableEther = await this.airlineService.getRefundableEther(
       this.state.accounts
     );
     refundableEther = this.toEther(refundableEther.toNumber());
 
-    console.log(refundableEther);
+    // console.log(refundableEther);
     this.setState({
       refundableEther
     });
@@ -95,8 +106,8 @@ export class App extends Component {
   }
 
   async load() {
-    this.getBalance();
     this.getFlights();
+    this.getBalance();
     this.getCustomerFlights();
     this.getRefundableEther();
   }
@@ -137,7 +148,7 @@ export class App extends Component {
               {this.state.flights.map((flight, i) => (
                 <div key={i}>
                   <span>
-                    {flight.name} - const: {this.toEther(flight.price)} eth
+                    {flight.name} - cost: {this.toEther(flight.price)} eth
                   </span>
                   <button
                     onClick={() => this.buyFlight(i, flight)}
@@ -153,7 +164,7 @@ export class App extends Component {
             <Panel title="Your flights">
               {this.state.customerFlights.map((flight, i) => (
                 <div key={i}>
-                  {flight.name} - cost: {flight.price}
+                  {flight.name} - cost: {this.toEther(flight.price)} eth
                 </div>
               ))}
             </Panel>
