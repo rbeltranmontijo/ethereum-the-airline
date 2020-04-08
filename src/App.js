@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Panel from "./Panel";
-
+import { ToastContainer } from "react-toastr";
 import getWeb3 from "./getWeb3";
 import AirlineContract from "./airline";
 import { AirlineServices } from "./airlineService";
@@ -33,6 +33,11 @@ export class App extends Component {
         if (customer === this.state.accounts) {
           console.log(
             `You purchased a flight to ${flight} with a cost of ${price}`
+          );
+        } else {
+          this.container.success(
+            `Last customer purchased a flight to ${flight} with a cost of ${price}`,
+            "Flight information"
           );
         }
       }.bind(this)
@@ -170,6 +175,10 @@ export class App extends Component {
             </Panel>
           </div>
         </div>
+        <ToastContainer
+          ref={input => (this.container = input)}
+          className="toast-top-right"
+        />
       </React.Fragment>
     );
   }
